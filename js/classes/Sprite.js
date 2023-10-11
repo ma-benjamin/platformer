@@ -2,8 +2,10 @@ class Sprite {
     constructor({position, imageSrc, frameRate = 1, frameBuffer = 4, scale = 1}) {
       this.position = position
       this.scale = scale
+      this.loaded = false
       this.image = new Image()
       this.image.onload = () => {
+        this.loaded = true
         this.width = (this.image.width / this.frameRate) * this.scale
         this.height = (this.image.height) * this.scale
       }

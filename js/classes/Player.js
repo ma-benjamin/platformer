@@ -1,5 +1,5 @@
 class Player extends Sprite {
-  constructor({position, collisionBlocks, imageSrc, frameRate, scale = 0.5}) {
+  constructor({position, collisionBlocks, imageSrc, frameRate, scale = 0.5, animations}) {
     super({ imageSrc, frameRate, scale })
     
     this.position = position
@@ -24,6 +24,26 @@ class Player extends Sprite {
       width: 10,
       height: 10,
     }
+
+    this.animations = animations
+    this.lastDirection = 'right'
+
+    for (let key in this.animations) {
+      const image = new Image()
+      image.src = this.animations[key].imageSrc
+
+      this.animations[key].image = image
+
+    }
+  }
+
+  switchSprite(key) {
+    if (this.image === this.animations[key].image || !this.loaded) return
+
+    this.currentFrame = 0
+    this.image = this.animations[key].image
+    this.frameRate = this.animations[key].frameRate
+    this.frameBuffer = this.animations[key].frameBuffer
   }
 
   update() {
@@ -31,18 +51,20 @@ class Player extends Sprite {
     this.updateHitbox()
 
     // draws out the image
-    c.fillStyle = 'rgba(0, 255, 0, 0.2)'
-    c.fillRect(this.position.x, this.position.y, this.width, this.height)
+    // c.fillStyle = 'rgba(0, 255, 0, 0.2)'
+    // c.fillRect(this.position.x, this.position.y, this.width, this.height)
 
     //draws out hitbox
-    c.fillStyle = 'rgba(255, 0, 0, 0.2)'
-    c.fillRect(this.hitbox.position.x, 
-               this.hitbox.position.y, 
-               this.hitbox.width, 
-               this.hitbox.height)
+    // c.fillStyle = 'rgba(255, 0, 0, 0.2)'
+    // c.fillRect(this.hitbox.position.x, 
+    //            this.hitbox.position.y, 
+    //            this.hitbox.width, 
+    //            this.hitbox.height)
 
     this.draw()
+
     this.position.x += this.velocity.x
+    this.updateHitbox()
     this.checkForHorizontalCollisions()
     this.applyGravity()
     this.updateHitbox()
@@ -65,7 +87,7 @@ class Player extends Sprite {
       const collisionBlock = this.collisionBlocks[i]
 
       if (collision({
-          object1: this,
+          object1: this.hitbox,
           object2: collisionBlock,
         })
       ) {
@@ -98,13 +120,19 @@ class Player extends Sprite {
       ) {
         if (this.velocity.x > 0) {
           this.velocity.x = 0
-          this.position.x = collisionBlock.position.x - this.width - 0.01
+
+          const offset = this.hitbox.position.x - this.position.x + this.hitbox.width
+          this.position.x = collisionBlock.position.x - offset - 0.01
           break
         }
 
         if (this.velocity.x < 0) {
           this.velocity.x = 0
-          this.position.x = collisionBlock.position.x + collisionBlock.width + 0.01
+
+          const offset = this.hitbox.position.x - this.position.x
+
+          this.position.x =
+            collisionBlock.position.x + collisionBlock.width - offset + 0.01
           break
         }
       }
@@ -112,7 +140,7 @@ class Player extends Sprite {
   }
 
   applyGravity() {
-    this.position.y += this.velocity.y
     this.velocity.y += this.gravity
+    this.position.y += this.velocity.y
   }
 }
