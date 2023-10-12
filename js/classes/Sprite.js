@@ -47,11 +47,10 @@ class Sprite {
 
     updateFrames() {
       this.elapsedFrames++
-
+      
       if (this.elapsedFrames % this.frameBuffer === 0) {
         if (this.currentFrame < this.frameRate - 1) this.currentFrame++
         else this.currentFrame = 0
       }
-      
     }
   }

@@ -45,6 +45,7 @@ platformCollisions2D.forEach((row, y)=> {
             x: 16 * x,
             y: 16 * y,
           },
+          height: 4
         })
       )
     }
@@ -60,6 +61,7 @@ const player = new Player({
     y: 300,
   },
   collisionBlocks,
+  platformBlocks,
   imageSrc: './images/warrior/Idle.png',
   frameRate: 8,
   animations: {
@@ -128,6 +130,15 @@ const background = new Sprite({
   imageSrc: './images/background.png'
 })
 
+const bgImgHeight = 432
+
+const camera = {
+  position: {
+    x: 0,
+    y: -bgImgHeight + scaledCanvas.height,
+  }
+}
+
 function animate() {
   window.requestAnimationFrame(animate)
   c.fillStyle = 'white'
@@ -135,26 +146,30 @@ function animate() {
 
   c.save()
   c.scale(4,4)
-  c.translate(0, -background.image.height + scaledCanvas.height)
+  c.translate(camera.position.x, camera.position.y)
   background.update()
-  collisionBlocks.forEach((collisionBlock) => {
-    collisionBlock.update()
-  })
-  platformBlocks.forEach((platformBlock) => {
-    platformBlock.update()
-  })
+  
+  // collisionBlocks.forEach((collisionBlock) => {
+  //   collisionBlock.update()
+  // })
+  // platformBlocks.forEach((platformBlock) => {
+  //   platformBlock.update()
+  // })
 
+  player.checkCanvasSides()
   player.update()
 
   player.velocity.x = 0
   if (keys.d.pressed) {
-    player.lastDirection = 'right'
     player.switchSprite('Run')
     player.velocity.x = 2
+    player.lastDirection = 'right'
+    player.panLeft({canvas, camera})
   } else if (keys.a.pressed) {
     player.lastDirection = 'left'
     player.switchSprite('RunLeft')
     player.velocity.x = -2
+    player.panRight({canvas, camera})
   } else if (player.velocity.y === 0) {
     if (player.lastDirection ==='right') {
       player.switchSprite('Idle')
@@ -164,12 +179,14 @@ function animate() {
   }
 
   if (player.velocity.y < 0) {
+    player.panDown({ canvas, camera })
     if (player.lastDirection ==='right') {
       player.switchSprite('Jump')
     } else {
       player.switchSprite('JumpLeft')
     }
   } else if (player.velocity.y > 0) {
+    player.panUp({ canvas, camera })
     if (player.lastDirection ==='right') {
       player.switchSprite('Fall')
     } else {

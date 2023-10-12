@@ -1,11 +1,11 @@
 window.addEventListener('keydown', (event) => {
   switch (event.key) {
     case 'w':
-      player.velocity.y = -8
+      if (player.velocity.y == 0) player.velocity.y = -4
       break
     case ' ':
       if (player.velocity.y == 0)
-        player.velocity.y = -15
+        player.velocity.y = -4
       break
     case 'a':
       keys.a.pressed = true
